@@ -52,7 +52,7 @@
 	Slid Show image part
 -----------------------------------------*/ 
 .cb-slideshow li:nth-child(1) span {
-	 background-image: url(http://placehold.it/1600x900&text=image1);
+	 background-image: url(https://www.dropbox.com/s/13mq26wzfd75cg3/1.jpg);
 	 
 }
 .cb-slideshow li:nth-child(2) span {
