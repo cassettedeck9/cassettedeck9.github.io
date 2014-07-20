@@ -85,7 +85,7 @@ opacity: 0;
 opacity: 1;
  -webkit-animation-timing-function: ease-out;
 }
- 0% {
+ 8% {
 opacity: 1
 }
  50% {
