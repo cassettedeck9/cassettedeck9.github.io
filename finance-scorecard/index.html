@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Finance Build Scorecard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a single-column build report. Scorecard numbers up top, then goals, pipeline, stack, timeline, lessons. */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --fg:#14181f; --muted:#5b6472; --line:#dde1e8;
+  --accent:#1f4fd1; --accent-soft:#e6ecfb; --good:#17794a; --good-soft:#e2f3ea; --warn:#9a6200; --warn-soft:#fbf0d9;
+  --display:"Schibsted Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --body:"Inter",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1218; --surface:#171b23; --fg:#e8ebf1; --muted:#9aa3b2; --line:#2a303b;
+  --accent:#7b9cff; --accent-soft:#1d2741; --good:#5fd197; --good-soft:#143224; --warn:#f0bb5a; --warn-soft:#3a2c10; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1218; --surface:#171b23; --fg:#e8ebf1; --muted:#9aa3b2; --line:#2a303b;
+  --accent:#7b9cff; --accent-soft:#1d2741; --good:#5fd197; --good-soft:#143224; --warn:#f0bb5a; --warn-soft:#3a2c10; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55}
+.wrap{max-width:1040px;margin:0 auto;padding-block:40px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(30px,5vw,44px);font-weight:800;line-height:1.08}
+h2{font-size:22px;font-weight:700}
+h3{font-size:16px;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)}
+header{display:flex;flex-direction:column;gap:12px}
+header .lede{max-width:68ch;font-size:17px;color:var(--muted)}
+section{display:flex;flex-direction:column;gap:16px}
+.sec-head{display:flex;flex-direction:column;gap:4px}
+.sec-head p{max-width:70ch}
+
+/* scorecard */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.stat{background:var(--surface);padding:18px 18px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat .n{font-family:var(--display);font-weight:800;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.stat .l{font-size:13px;font-weight:600}
+.stat .s{font-size:12px;color:var(--muted)}
+
+/* chart */
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 16px 10px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:560px;height:auto}
+.chart .cap{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* goals */
+.goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.goal{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.goal-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pill{font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.pill.done{background:var(--good-soft);color:var(--good)}
+.pill.part{background:var(--warn-soft);color:var(--warn)}
+.goal p{font-size:14px}
+.goal .proof{font-size:13px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;counter-reset:step}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;position:relative;min-width:0}
+.step .k{font-family:var(--mono);font-size:11px;color:var(--accent)}
+.step h3{font-size:15px}
+.step p{font-size:12.5px;color:var(--muted);line-height:1.45}
+.step code{font-family:var(--mono);font-size:11.5px;color:var(--fg);background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+@media (max-width:900px){.pipe{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.pipe{grid-template-columns:1fr}}
+
+/* stack */
+.stack{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.node{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.node .tag{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.node ul{margin:0;padding-left:18px;font-size:13.5px}
+.node li+li{margin-top:2px}
+
+/* timeline */
+.tl{display:flex;flex-direction:column;border-left:2px solid var(--line);margin-left:6px}
+.tl-item{position:relative;padding:0 0 20px 22px;display:grid;grid-template-columns:150px 1fr;gap:4px 18px}
+.tl-item::before{content:"";position:absolute;left:-7px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.tl-item.big::before{background:var(--accent)}
+.tl-date{font-family:var(--mono);font-size:12.5px;color:var(--muted);padding-top:2px}
+.tl-body{min-width:0;display:flex;flex-direction:column;gap:3px}
+.tl-body p{font-size:14px;color:var(--muted)}
+.tl-body .prs{font-family:var(--mono);font-size:11.5px;color:var(--accent)}
+@media (max-width:560px){.tl-item{grid-template-columns:1fr}}
+
+/* takeaways */
+.lead{background:var(--accent-soft);border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:8px}
+.lead .k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.lead h3{font-size:clamp(20px,3vw,26px);font-weight:800;line-height:1.15}
+.lead p{max-width:72ch;font-size:15px}
+.takes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:860px){.takes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.takes{grid-template-columns:1fr}}
+.take{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.take p{font-size:14px;color:var(--muted)}
+.closer{border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+.closer p{max-width:72ch;font-size:15px}
+footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:4px}
+footer code{font-family:var(--mono)}
+
+/* screenshots */
+.shots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 20px}
+@media (max-width:820px){.shots{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:560px){.shots{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 12px}}
+.shot{margin:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+.phone{background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 1px 2px rgba(20,24,31,.06),0 8px 24px -12px rgba(20,24,31,.18);aspect-ratio:923/2000;max-width:100%}
+.phone img{display:block;width:100%;height:100%;object-fit:cover}
+.shot figcaption{display:flex;flex-direction:column;gap:2px}
+.shot .t{font-family:var(--display);font-weight:700;font-size:14px}
+.shot .d{font-size:12.5px;color:var(--muted);line-height:1.45}
+.principles{display:flex;flex-wrap:wrap;gap:8px}
+.principles span{font-size:12.5px;background:var(--accent-soft);color:var(--fg);padding:5px 10px;border-radius:99px}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Personal exploration · Oct 27 – Nov 18, 2026</div>
+  <h1>Finance: from idea to a real iPhone app in 23 days</h1>
+  <p class="lede">A side project to learn how a product person can build real software with Claude Code: strategy, design, specs, code and testing, all in one loop. The result is a working personal-finance app on my phone, connected to my real bank accounts through Plaid, with the backend hosted on Replit.</p>
+</header>
+
+<section aria-labelledby="score">
+  <div class="sec-head"><h2 id="score">Scorecard</h2></div>
+  <div class="stats">
+    <div class="stat"><span class="n">65</span><span class="l">Pull requests merged</span><span class="s">0 abandoned</span></div>
+    <div class="stat"><span class="n">534</span><span class="l">Commits</span><span class="s">across 20 working days</span></div>
+    <div class="stat"><span class="n">23.4k</span><span class="l">Lines of app code</span><span class="s">TypeScript, 120 files</span></div>
+    <div class="stat"><span class="n">11.2k</span><span class="l">Lines of tests</span><span class="s">~600 tests, 57 files</span></div>
+    <div class="stat"><span class="n">41</span><span class="l">Issues closed</span><span class="s">4 specs broken into tickets</span></div>
+    <div class="stat"><span class="n">8.9k</span><span class="l">Lines of docs and wiki</span><span class="s">strategy, decisions, sessions</span></div>
+  </div>
+  <div class="chart">
+    <svg id="commits" viewBox="0 0 760 190" role="img" aria-label="Commits per day, Oct 27 to Nov 18. Peak of 152 on Nov 5; 62 on Nov 14 when Cards and cash shipped."></svg>
+    <p class="cap">Commits to <code>main</code> per day. Spikes line up with the strategy sprint (Nov 5) and the Cards &amp; cash build day (Nov 14).</p>
+  </div>
+</section>
+
+<section aria-labelledby="app">
+  <div class="sec-head">
+    <h2 id="app">The app, on my iPhone</h2>
+    <p class="muted">Unedited screenshots of the standalone build, with my real accounts linked through Plaid. Every screen was designed, built and tuned in code, then checked on the phone.</p>
+  </div>
+  <div class="shots">
+    <figure class="shot"><div class="phone"><img src="shots/s1.webp" alt="Card Overview home: spending this month with a line chart compared to last month's pace" loading="lazy"></div><figcaption><span class="t">Spending, in context</span><span class="d">This month’s pace against the same days last month, so “am I on track?” is answered at a glance.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s2.webp" alt="A week of spending: daily tiles shaded by amount and the largest purchases" loading="lazy"></div><figcaption><span class="t">A week at a glance</span><span class="d">Days shade by how much was spent, with the biggest purchases underneath.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s3.webp" alt="Spending tab loading with placeholders shaped like the final chart and list" loading="lazy"></div><figcaption><span class="t">Loading that keeps its shape</span><span class="d">Placeholders match the real layout, so nothing jumps when data arrives.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s4.webp" alt="Transactions tab loading placeholders with a soft moving light" loading="lazy"></div><figcaption><span class="t">One loading language</span><span class="d">The same calm placeholder style across every tab, built once and reused.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s5.webp" alt="Spending tab: five months of income and spending bars with October selected" loading="lazy"></div><figcaption><span class="t">Five months of money out</span><span class="d">Income sits behind spending, and the selected month stands out.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s6.webp" alt="Look at a card sheet listing each card with its purpose, such as Everyday and Coffee" loading="lazy"></div><figcaption><span class="t">Cards by purpose</span><span class="d">Each card carries what I use it for, so the picker reads like my own mental model.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s7.webp" alt="Money in sheet: income by account, with transfers between accounts listed separately" loading="lazy"></div><figcaption><span class="t">Honest income</span><span class="d">Moving money between my own accounts is shown, but never counted as income.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s8.webp" alt="Money out sheet: spending by account, with transfers and card payments not counted" loading="lazy"></div><figcaption><span class="t">No double counting</span><span class="d">Card payments pay off purchases already counted, and the sheet says so.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s9.webp" alt="Accounts view: cash and card balances, net cash, and upcoming card due dates" loading="lazy"></div><figcaption><span class="t">Right now and coming up</span><span class="d">Cash, cards and net cash, labeled “not an amount to spend”, plus reported due dates.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s10.webp" alt="Billing details sheet for a card with due date, statement balance and minimum" loading="lazy"></div><figcaption><span class="t">Careful with what we don’t know</span><span class="d">A due date is “a billing date, not a scheduled withdrawal”. The app doesn’t claim what Plaid can’t confirm.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s11.webp" alt="Card detail page with a balance chart showing actual and estimated history" loading="lazy"></div><figcaption><span class="t">Actuals vs. estimates</span><span class="d">Balance history rebuilt from transactions is drawn lighter, so it never passes for a real reading.</span></figcaption></figure>
+    <figure class="shot"><div class="phone"><img src="shots/s12.webp" alt="Balances view: three months of card balances with actual and estimated segments" loading="lazy"></div><figcaption><span class="t">Balances over time</span><span class="d">Three months of card balances, with a line or bar view and a details drill-down.</span></figcaption></figure>
+  </div>
+</section>
+
+<section aria-labelledby="goals">
+  <div class="sec-head">
+    <h2 id="goals">What I set out to learn</h2>
+    <p class="muted">Five questions going in, and what the project showed.</p>
+  </div>
+  <div class="goals">
+    <article class="goal">
+      <div class="goal-top"><h3>Can I build real software with Claude Code?</h3><span class="pill done">Proven</span></div>
+      <p>Yes. A full-stack app with auth, a database, a background sync worker, bank data and a native iOS build. Claude Code wrote the code, ran tests, read Simulator logs and took screenshots to check its own work.</p>
+      <p class="proof">65 PRs, every one merged. Standalone “Finance Beta” build installed on my iPhone Nov 18.</p>
+    </article>
+    <article class="goal">
+      <div class="goal-top"><h3>Can skills take me from idea to design to software?</h3><span class="pill done">Proven</span></div>
+      <p>Product Foundations ran voice-led strategy sessions. Design Studio explored five options and handed off to Figma. Matt Pocock’s <code>/to-spec</code> and <code>/to-tickets</code> turned the design into issues that agents built.</p>
+      <p class="proof">29 skills in the repo. Cards &amp; cash went spec → 12 tickets → 13 PRs.</p>
+    </article>
+    <article class="goal">
+      <div class="goal-top"><h3>Can I iterate fast on a real phone, past the prototype?</h3><span class="pill done">Proven</span></div>
+      <p><code>npm run sim</code> for the Simulator and <code>npm run phone</code> for my iPhone. Code changes reload live. I react to the real thing with my own bank data, not a clickable mock.</p>
+      <p class="proof">Cards &amp; cash: 12 tickets built and merged in a single day (Nov 14).</p>
+    </article>
+    <article class="goal">
+      <div class="goal-top"><h3>Do the “real” AI coding workflows hold up?</h3><span class="pill done">Proven</span></div>
+      <p>Matt Pocock’s skills set the discipline: specs, vertical-slice tickets, test-first builds, code review and retros. A parent session ran child sessions in parallel, with auto-merge after screenshot review.</p>
+      <p class="proof">~600 automated tests. 2 retros fed new guardrails back into the rules.</p>
+    </article>
+    <article class="goal">
+      <div class="goal-top"><h3>Can a product person design in code instead of Figma?</h3><span class="pill part">Promising</span></div>
+      <p>Much of the late polish happened in code: I dictated tweaks (“slightly increase the line weight”), saw them on the phone in seconds, and kept competing prototypes on a branch to compare. Figma stayed useful for the first big layout decision.</p>
+      <p class="proof">Figma still owned the initial Net Cash design; code owned the rest. Figma and Mobbin connectors were flaky in cloud sessions.</p>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="loop">
+  <div class="sec-head">
+    <h2 id="loop">The loop I ended up with</h2>
+    <p class="muted">Each step leaves a file in the repo, so any new Claude session can pick up where the last one stopped.</p>
+  </div>
+  <div class="pipe">
+    <div class="step"><span class="k">Idea</span><h3>Strategy</h3><p>Voice sessions with <code>/product-foundations</code>: jobs, pains, vision.</p></div>
+    <div class="step"><span class="k">Evidence</span><h3>Research</h3><p>Competitors, trust, behavior research; StoryBrand narrative.</p></div>
+    <div class="step"><span class="k">Explore</span><h3>Design</h3><p><code>/design-studio</code>: five options, review, Figma handoff, HTML prototype.</p></div>
+    <div class="step"><span class="k">Define</span><h3>Spec</h3><p><code>/to-spec</code> writes a GitHub issue with acceptance criteria.</p></div>
+    <div class="step"><span class="k">Slice</span><h3>Tickets</h3><p><code>/to-tickets</code> splits it into thin, testable slices.</p></div>
+    <div class="step"><span class="k">Build</span><h3>Code + test</h3><p><code>/tdd</code> per ticket, Simulator screenshots, PR, review.</p></div>
+    <div class="step"><span class="k">Feel</span><h3>On my phone</h3><p>Use it with real data, dictate changes, repeat.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="stack">
+  <div class="sec-head">
+    <h2 id="stack">How the pieces fit</h2>
+    <p class="muted">One codebase. GitHub keeps the two halves in sync.</p>
+  </div>
+  <div class="stack">
+    <div class="node"><span class="tag">MAC + IPHONE</span><h3>The app</h3><ul><li>Expo / React Native, TypeScript</li><li>iOS Simulator and a real iPhone build</li><li>Claude Code runs and checks it here</li></ul></div>
+    <div class="node"><span class="tag">REPLIT</span><h3>The backend</h3><ul><li>API routes, Postgres, sync worker</li><li>Holds the Plaid and auth secrets</li><li>Published Nov 18 as a real deployment</li></ul></div>
+    <div class="node"><span class="tag">PLAID + CLERK</span><h3>Data and sign-in</h3><ul><li>Plaid production: live bank and card data, including card bills</li><li>Clerk sign-in, locked to one owner</li></ul></div>
+    <div class="node"><span class="tag">GITHUB</span><h3>The source of truth</h3><ul><li>Issues for specs and tickets</li><li>Every change goes through a PR</li><li>Wiki of decisions and session notes</li></ul></div>
+  </div>
+</section>
+
+<section aria-labelledby="shipped">
+  <div class="sec-head"><h2 id="shipped">What shipped</h2></div>
+  <div class="tl">
+    <div class="tl-item"><span class="tl-date">Oct 27 – Nov 2</span><div class="tl-body"><h3>First screens on Replit</h3><p>Linked accounts, a monthly spending view, paycheck details, five-tab navigation.</p><span class="prs">PRs #1–#8</span></div></div>
+    <div class="tl-item"><span class="tl-date">Nov 3 – 4</span><div class="tl-body"><h3>Hybrid workflow</h3><p>Moved the app to the Mac Simulator with Claude Code, kept the backend on Replit, started the project wiki.</p><span class="prs">PRs #9–#11</span></div></div>
+    <div class="tl-item"><span class="tl-date">Nov 5 – 7</span><div class="tl-body"><h3>Safe test data</h3><p>Three fictional households in a separate database, with a switcher, so I can test without touching real accounts.</p><span class="prs">PRs #25–#32 · 1 spec, 10 tickets</span></div></div>
+    <div class="tl-item"><span class="tl-date">Nov 9 – 11</span><div class="tl-body"><h3>Strategy and polish</h3><p>Product Foundations sessions, research, narrative. Shared headers, a loading experience, and the first build on my iPhone.</p><span class="prs">PRs #36–#57</span></div></div>
+    <div class="tl-item"><span class="tl-date">Nov 12 – 13</span><div class="tl-body"><h3>Net Cash v1</h3><p>Designed in Figma, specced, built across 8 tickets. Tagged and then replaced: a fast way to learn what I didn’t want.</p><span class="prs">PR #67 · 8 tickets</span></div></div>
+    <div class="tl-item big"><span class="tl-date">Nov 14 – 16</span><div class="tl-body"><h3>Cards &amp; cash becomes Home</h3><p>Spending, payments and balances for cards and cash. 12 tickets built by parallel agent sessions in one day, then restyled in code.</p><span class="prs">PRs #81–#103</span></div></div>
+    <div class="tl-item big"><span class="tl-date">Nov 18</span><div class="tl-body"><h3>Finance Beta</h3><p>Published the Replit backend and installed a standalone app on my iPhone. No laptop needed.</p><span class="prs">PRs #104–#107</span></div></div>
+  </div>
+</section>
+
+<section aria-labelledby="lessons">
+  <div class="sec-head"><h2 id="lessons">Takeaways for how we build</h2></div>
+  <div class="lead">
+    <span class="k">The big one</span>
+    <h3>Roles are blurring into competencies.</h3>
+    <p>The future of product development is multidisciplinary builders. Engineers design and prototype. Product people build and test real software. Designers refine and prototype experiences in code, and handoffs get lighter.</p>
+  </div>
+  <div class="takes">
+    <div class="take"><h3>Claude Code isn’t just for engineers</h3><p>The future of product development has product managers and designers working in Claude Code alongside engineers, all on one shared end-to-end workflow.</p></div>
+    <div class="take"><h3>Design and iteration move into code</h3><p>I prototyped several coded versions of an idea inside a working app, refined them conversationally, and kept the best. It works at any fidelity, from a quick sketch to the real app.</p></div>
+    <div class="take"><h3>Code can tune the experience</h3><p>Claude built toggles and sliders into the app so I could fine-tune spacing, weight and motion by feel. That closed the last mile without a round of handoffs.</p></div>
+    <div class="take"><h3>The connected toolchain is essential</h3><p>Figma and Mobbin through MCP, tickets in GitHub or Jira, a real backend and bank data, all wired into one harness. The value is in the full loop, not any single tool.</p></div>
+    <div class="take"><h3>Skills can codify how Ally builds</h3><p>Skills turn our product process into something repeatable. They can raise the pace of every product person and give us a recognizable Ally way of building.</p></div>
+    <div class="take"><h3>Use the right agent for the job</h3><p>Platforms have different strengths. Codex’s voice mode was far better for real-time spoken sessions; Claude Code led on building. A multi-agent approach gets the best of each.</p></div>
+  </div>
+  <div class="closer">
+    <h3>This is a career skill</h3>
+    <p>Matt Pocock’s engineering skills taught me real software discipline. Five years from now, I expect every product person to be comfortable building out ideas in Claude Code and tools like it.</p>
+  </div>
+</section>
+
+<footer>
+  <span>Source: <code>cassettedeck9/finance</code>, <code>main</code> as of Nov 18, 2026. Line counts are tracked files today (app = <code>src/</code>; tests = <code>tests/</code>); over the whole project ~102k lines were added and ~18k removed, docs included. Commit and PR counts from git history and GitHub.</span>
+  <span>Screenshots show the app with my own linked accounts, taken Nov 25, 2026.</span>
+</footer>
+</div>
+
+<script>
+(function(){
+  var data={"10-27":17,"10-28":21,"10-29":1,"10-30":13,"10-31":14,"11-02":5,"11-03":14,"11-04":6,"11-05":152,"11-06":20,"11-07":4,"11-09":52,"11-10":30,"11-11":23,"11-12":52,"11-13":9,"11-14":62,"11-15":10,"11-16":20,"11-18":9};
+  var days=[],d=new Date(Date.UTC(2026,9,27)),end=new Date(Date.UTC(2026,10,18));
+  while(d<=end){var k=String(d.getUTCMonth()+1).padStart(2,"0")+"-"+String(d.getUTCDate()).padStart(2,"0");days.push({k:k,m:d.getUTCMonth(),day:d.getUTCDate(),v:data[k]||0});d=new Date(d.getTime()+864e5);}
+  var W=760,H=190,L=34,R=8,T=14,B=26,max=160,pw=W-L-R,ph=H-T-B,bw=pw/days.length,ns="http://www.w3.org/2000/svg",svg=document.getElementById("commits");
+  function el(t,a,txt){var e=document.createElementNS(ns,t);for(var x in a)e.setAttribute(x,a[x]);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;}
+  [0,40,80,120,160].forEach(function(g){var y=T+ph-(g/max)*ph;el("line",{x1:L,x2:W-R,y1:y,y2:y,stroke:"var(--line)","stroke-width":1});el("text",{x:L-6,y:y+4,"text-anchor":"end","font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"},g);});
+  days.forEach(function(p,i){
+    var h=(p.v/max)*ph,x=L+i*bw+bw*0.18,w=bw*0.64,y=T+ph-h,hi=p.k==="11-05"||p.k==="11-14";
+    if(p.v>0){var r=el("rect",{x:x,y:y,width:w,height:h,rx:2,fill:hi?"var(--accent)":"var(--muted)","fill-opacity":hi?1:0.45});el("title",{},"");r.appendChild(document.createElementNS(ns,"title")).textContent=(p.m===9?"Oct ":"Nov ")+p.day+": "+p.v+" commits";}
+    if(hi)el("text",{x:x+w/2,y:y-4,"text-anchor":"middle","font-size":10.5,"font-weight":600,fill:"var(--fg)","font-family":"JetBrains Mono, monospace"},p.v);
+    if(p.day===27||p.day===1||p.day%5===0&&p.m===10||p.k==="11-18")el("text",{x:L+i*bw+bw/2,y:H-8,"text-anchor":"middle","font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"},(p.m===9?"Oct ":"Nov ")+p.day);
+  });
+})();
+</script>
+
+</body>
+</html>
